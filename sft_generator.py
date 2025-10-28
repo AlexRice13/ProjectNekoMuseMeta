@@ -7,9 +7,32 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Callable, Deque, Dict, List, Optional, Set
 
+
+class PromptLoadError(RuntimeError):
+    """Raised when a system prompt cannot be loaded from disk."""
+
+
 import pandas as pd
 from openai import AsyncOpenAI
 from tqdm import tqdm
+
+
+def load_system_prompt_from_markdown(path: str) -> str:
+    """Read a system prompt from a Markdown file."""
+
+    if not path:
+        raise PromptLoadError("system prompt path must be provided")
+    expanded_path = os.path.expanduser(path)
+    if not os.path.exists(expanded_path):
+        raise PromptLoadError(f"system prompt file not found: {path}")
+    try:
+        with open(expanded_path, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+    except OSError as exc:
+        raise PromptLoadError(f"failed to read system prompt: {path}") from exc
+    if not content:
+        raise PromptLoadError(f"system prompt file is empty: {path}")
+    return content
 
 
 @dataclass
@@ -131,6 +154,7 @@ async def generate_sft_async(
     concurrency: int = 10,
     base_prompt: Optional[str] = None,
     dropout_fn: Optional[Callable[[str, float], str]] = None,
+    system_prompt_markdown: Optional[str] = None,
 ) -> None:
     del sleep_time  # 参数兼容：在并发模型中不再逐条 sleep
 
@@ -147,11 +171,20 @@ async def generate_sft_async(
         except NameError as exc:
             raise RuntimeError("prompt_dropout function must be provided") from exc
 
-    if base_prompt is None:
+    prompt_source = base_prompt
+    if system_prompt_markdown:
+        prompt_source = load_system_prompt_from_markdown(system_prompt_markdown)
+
+    if prompt_source is None:
         try:
-            base_prompt = role_prompt  # type: ignore[name-defined]
+            prompt_source = role_prompt  # type: ignore[name-defined]
         except NameError as exc:
             raise RuntimeError("role_prompt must be provided or imported") from exc
+
+    if not isinstance(prompt_source, str) or not prompt_source.strip():
+        raise RuntimeError("system prompt must be a non-empty string")
+
+    base_prompt_value = prompt_source
 
     client = AsyncOpenAI(base_url=api_base, api_key=api_key)
 
@@ -203,7 +236,7 @@ async def generate_sft_async(
                     include_cot,
                     think_tag,
                     max_retries,
-                    base_prompt,
+                    base_prompt_value,
                     dropout_fn,
                 )
             )
@@ -259,6 +292,11 @@ def main() -> None:
     parser.add_argument("--think_tag", default="think", help="思维链标签 (默认 think)")
     parser.add_argument("--concurrency", type=int, default=10, help="并发请求数（建议 2~16 之间按限流调）")
     parser.add_argument("--max_retries", type=int, default=3, help="失败重试次数")
+    parser.add_argument(
+        "--system_prompt_markdown",
+        default=None,
+        help="读取外部 Markdown 文件作为 system prompt",
+    )
     args = parser.parse_args()
 
     asyncio.run(
@@ -276,6 +314,7 @@ def main() -> None:
             think_tag=args.think_tag,
             max_retries=args.max_retries,
             concurrency=args.concurrency,
+            system_prompt_markdown=args.system_prompt_markdown,
         )
     )
 
