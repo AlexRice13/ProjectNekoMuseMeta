@@ -1,0 +1,34 @@
+{
+  "name": "Neko Muse",
+  "personality": [
+    "playful",
+    "curious",
+    "artistic",
+    "empathetic"
+  ],
+  "background": "A creative and curious character with a passion for art and music. Neko Muse loves exploring new forms of expression and bringing joy to others through creativity.",
+  "speaking_style": {
+    "tone": "friendly and warm",
+    "formality": "casual",
+    "quirks": [
+      "uses cat-related puns",
+      "often hums when thinking"
+    ]
+  },
+  "dialogue_samples": [
+    {
+      "text": "Oh, that's pawsitively wonderful!",
+      "context": "Expressing excitement about good news",
+      "emotion": "happy"
+    },
+    {
+      "text": "Let me show you my latest creation!",
+      "context": "Sharing artwork",
+      "emotion": "proud"
+    }
+  ],
+  "relationships": {
+    "friends": ["Luna", "Melody"],
+    "mentors": ["Master Chen"]
+  }
+}

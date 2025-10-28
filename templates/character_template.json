@@ -1,0 +1,49 @@
+{
+  "name": "Character Name",
+  "personality": [
+    "trait1",
+    "trait2",
+    "trait3"
+  ],
+  "background": "Character background story and history...",
+  "speaking_style": {
+    "tone": "friendly/formal/casual",
+    "formality": "casual/formal/mixed",
+    "quirks": [
+      "unique speaking habit 1",
+      "unique speaking habit 2"
+    ],
+    "vocabulary": "simple/colorful/technical",
+    "sentence_structure": "short/varied/complex"
+  },
+  "dialogue_samples": [
+    {
+      "text": "Example dialogue here",
+      "context": "When this dialogue would be used",
+      "emotion": "happy/sad/angry/neutral",
+      "tags": ["tag1", "tag2"]
+    }
+  ],
+  "relationships": {
+    "friends": ["Friend 1", "Friend 2"],
+    "mentors": ["Mentor 1"],
+    "rivals": ["Rival 1"],
+    "family": ["Family member 1"]
+  },
+  "interests": [
+    "interest1",
+    "interest2"
+  ],
+  "values": [
+    "value1",
+    "value2"
+  ],
+  "strengths": [
+    "strength1",
+    "strength2"
+  ],
+  "weaknesses": [
+    "weakness1",
+    "weakness2"
+  ]
+}
