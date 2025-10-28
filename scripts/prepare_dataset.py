@@ -16,15 +16,20 @@ from typing import Dict, List, Any, Tuple
 class DatasetPreparator:
     """Prepare training datasets from character metadata."""
     
-    def __init__(self, metadata_path: str, output_dir: str):
+    # Maximum number of dialogue samples to include per character
+    MAX_DIALOGUE_SAMPLES = 100
+    
+    def __init__(self, metadata_path: str, output_dir: str, max_dialogue_samples: int = None):
         """Initialize the dataset preparator.
         
         Args:
             metadata_path: Path to character metadata file
             output_dir: Directory to save prepared datasets
+            max_dialogue_samples: Maximum dialogue samples to include (default: 100)
         """
         self.metadata_path = Path(metadata_path)
         self.output_dir = Path(output_dir)
+        self.max_dialogue_samples = max_dialogue_samples or self.MAX_DIALOGUE_SAMPLES
         
     def load_metadata(self) -> Dict[str, Any]:
         """Load character metadata.
@@ -65,7 +70,7 @@ class DatasetPreparator:
         
         # Generate dialogue-based pairs from examples
         dialogue_samples = metadata.get("dialogue_examples", [])
-        for i, sample in enumerate(dialogue_samples[:5]):  # Limit to 5 examples
+        for i, sample in enumerate(dialogue_samples[:self.max_dialogue_samples]):
             pairs.append({
                 "instruction": f"How would {char_name} respond in this situation?",
                 "response": sample.get("text", ""),
@@ -149,10 +154,21 @@ def main():
         required=True,
         help="Output directory for prepared datasets"
     )
+    parser.add_argument(
+        "--max-dialogue-samples",
+        "-d",
+        type=int,
+        default=100,
+        help="Maximum number of dialogue samples to include (default: 100)"
+    )
     
     args = parser.parse_args()
     
-    preparator = DatasetPreparator(args.metadata, args.output)
+    preparator = DatasetPreparator(
+        args.metadata, 
+        args.output,
+        args.max_dialogue_samples
+    )
     preparator.process()
 
 
